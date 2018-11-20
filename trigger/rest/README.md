@@ -1,10 +1,14 @@
+---
+title: REST
+weight: 4706
+---
 # tibco-rest
 This trigger provides your flogo application the ability to start a flow via REST over HTTP
 
 ## Installation
 
 ```bash
-flogo add trigger github.com/TIBCOSoftware/flogo-contrib/trigger/rest
+flogo install github.com/TIBCOSoftware/flogo-contrib/trigger/rest
 ```
 
 ## Schema
@@ -18,7 +22,7 @@ Settings, Outputs and Endpoint:
       "type": "integer"
     }
   ],
-  "outputs": [
+  "output": [
     {
       "name": "pathParams",
       "type": "params"
@@ -75,7 +79,7 @@ Configure the Trigger to handle a POST on /device
 {
   "triggers": [
     {
-      "name": "tibco-rest",
+      "name": "flogo-rest",
       "settings": {
         "port": "8080"
       },
@@ -101,7 +105,7 @@ Configure the Trigger to handle a GET on /device/:id
 {
   "triggers": [
     {
-      "name": "tibco-rest",
+      "name": "flogo-rest",
       "settings": {
         "port": "8080"
       },

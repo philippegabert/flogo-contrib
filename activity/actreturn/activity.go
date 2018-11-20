@@ -5,7 +5,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
 )
 
 // log is the default package logger
@@ -35,27 +34,36 @@ func (a *ReturnActivity) Metadata() *activity.Metadata {
 // Eval implements api.Activity.Eval - Invokes a REST Operation
 func (a *ReturnActivity) Eval(ctx activity.Context) (done bool, err error) {
 
-	mappings := ctx.GetInput(ivMappings).([]interface{})
+	actionCtx := ctx.ActivityHost()
+
+	if ctx.GetInput(ivMappings) == nil {
+		//No mapping
+		actionCtx.Return(nil, nil)
+		return true, nil
+	}
+
+	mappings, ok := ctx.GetInput(ivMappings).([]interface{})
+	if !ok {
+		return false, activity.NewError("invalid return mappings, mappings must be array", "", nil)
+	}
 
 	log.Debugf("Mappings: %+v", mappings)
 
 	mapperDef, err := mapper.NewMapperDefFromAnyArray(mappings)
 
 	//todo move this to a action instance level initialization, need the notion of static inputs or config
-	returnMapper := mapper.NewBasicMapper(mapperDef, ctx.ActionContext().GetResolver())
-
+	returnMapper := mapper.NewBasicMapper(mapperDef, ctx.ActivityHost().GetResolver())
 	if err != nil {
-		return false, err
+		return false, activity.NewError(err.Error(), "", nil)
 	}
 
-	actionCtx := ctx.ActionContext()
 	outputScope := newOutputScope(actionCtx, mapperDef)
 	inputScope := actionCtx.WorkingData() //flow data
 
 	err = returnMapper.Apply(inputScope, outputScope)
 
 	if err != nil {
-		return false, err
+		return false, activity.NewError(err.Error(), "", nil)
 	}
 
 	actionCtx.Return(outputScope.GetAttrs(), nil)
@@ -63,24 +71,24 @@ func (a *ReturnActivity) Eval(ctx activity.Context) (done bool, err error) {
 	return true, nil
 }
 
-func newOutputScope(actionCtx action.Context, mapperDef *data.MapperDef) *data.FixedScope {
+func newOutputScope(activityHost activity.Host, mapperDef *data.MapperDef) *data.FixedScope {
 
-	if actionCtx.InstanceMetadata() == nil {
+	if activityHost.IOMetadata() == nil {
 		//todo temporary fix to support tester service
-		attrs := make([]*data.Attribute, 0, len(mapperDef.Mappings))
+		attrs := make(map[string]*data.Attribute, len(mapperDef.Mappings))
 
 		for _, mappingDef := range mapperDef.Mappings {
-			attr, _ := data.NewAttribute(mappingDef.MapTo, data.ANY, nil)
-			attrs = append(attrs, attr)
+			attr, _ := data.NewAttribute(mappingDef.MapTo, data.TypeAny, nil)
+			attrs[attr.Name()] = attr
 		}
 
 		return data.NewFixedScope(attrs)
 	} else {
-		outAttrs := actionCtx.InstanceMetadata().Output
-		attrs := make([]*data.Attribute, 0, len(outAttrs))
+		outAttrs := activityHost.IOMetadata().Output
+		attrs := make(map[string]*data.Attribute, len(outAttrs))
 
 		for _, outAttr := range outAttrs {
-			attrs = append(attrs, outAttr)
+			attrs[outAttr.Name()] = outAttr
 		}
 
 		//create a fixed scope using the output metadata

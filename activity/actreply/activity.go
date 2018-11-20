@@ -5,7 +5,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
 )
 
 // log is the default package logger
@@ -42,13 +41,13 @@ func (a *ReplyActivity) Eval(ctx activity.Context) (done bool, err error) {
 	mapperDef, err := mapper.NewMapperDefFromAnyArray(mappings)
 
 	//todo move this to a action instance level initialization, need the notion of static inputs or config
-	replyMapper := mapper.NewBasicMapper(mapperDef, ctx.ActionContext().GetResolver())
+	replyMapper := mapper.NewBasicMapper(mapperDef, ctx.ActivityHost().GetResolver())
 
 	if err != nil {
 		return false, err
 	}
 
-	actionCtx := ctx.ActionContext()
+	actionCtx := ctx.ActivityHost()
 	outputScope := newOutputScope(actionCtx, mapperDef)
 	inputScope := actionCtx.WorkingData() //flow data
 
@@ -63,24 +62,24 @@ func (a *ReplyActivity) Eval(ctx activity.Context) (done bool, err error) {
 	return true, nil
 }
 
-func newOutputScope(actionCtx action.Context, mapperDef *data.MapperDef) *data.FixedScope {
+func newOutputScope(activityHost activity.Host, mapperDef *data.MapperDef) *data.FixedScope {
 
-	if actionCtx.InstanceMetadata() == nil {
+	if activityHost.IOMetadata() == nil {
 		//todo temporary fix to support tester service
-		attrs := make([]*data.Attribute, 0, len(mapperDef.Mappings))
+		attrs := make(map[string]*data.Attribute, len(mapperDef.Mappings))
 
 		for _, mappingDef := range mapperDef.Mappings {
-			attr, _ := data.NewAttribute(mappingDef.MapTo, data.ANY, nil)
-			attrs = append(attrs, attr)
+			attr, _ := data.NewAttribute(mappingDef.MapTo, data.TypeAny, nil)
+			attrs[attr.Name()] = attr
 		}
 
 		return data.NewFixedScope(attrs)
 	} else {
-		outAttrs := actionCtx.InstanceMetadata().Output
-		attrs := make([]*data.Attribute, 0, len(outAttrs))
+		outAttrs := activityHost.IOMetadata().Output
+		attrs := make(map[string]*data.Attribute, len(outAttrs))
 
 		for _, outAttr := range outAttrs {
-			attrs = append(attrs, outAttr)
+			attrs[outAttr.Name()] = outAttr
 		}
 
 		//create a fixed scope using the output metadata

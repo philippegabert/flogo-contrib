@@ -9,9 +9,9 @@ import (
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	//"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"testing"
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"encoding/json"
+	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
+	"testing"
 )
 
 var jsonTestMetadata = getTestJsonMetadata()
@@ -25,7 +25,7 @@ func getTestJsonMetadata() string {
 }
 
 const testConfig3 string = `{
-  "name": "tibco-timer",
+  "name": "flogo-timer",
   "settings": {
   },
   "endpoints": [
@@ -39,7 +39,7 @@ const testConfig3 string = `{
 }`
 
 const testConfig string = `{
-  "name": "tibco-timer",
+  "name": "flogo-timer",
   "settings": {
   },
   "endpoints": [
@@ -54,7 +54,7 @@ const testConfig string = `{
 }`
 
 const testConfig2 string = `{
-  "name": "tibco-timer",
+  "name": "flogo-timer",
   "settings": {
   },
   "endpoints": [
@@ -70,7 +70,7 @@ const testConfig2 string = `{
 }`
 
 const testConfig4 string = `{
-  "name": "tibco-timer",
+  "name": "flogo-timer",
   "settings": {
   },
   "endpoints": [
@@ -121,7 +121,7 @@ func (tr *TestRunner) Run(context context.Context, action action.Action, uri str
 func TestInit(t *testing.T) {
 	// New  factory
 	//f := &TimerFactory{}
-	//tgr := f.New("tibco-timer")
+	//tgr := f.New("flogo-timer")
 
 	//runner := &TestRunner{}
 
@@ -130,14 +130,13 @@ func TestInit(t *testing.T) {
 	//tgr.Init(config, runner)
 }
 
-
 /*
 //TODO fix this test
 func TestTimer(t *testing.T) {
 
 	// New  factory
 	f := &TimerFactory{}
-	tgr := f.New("tibco-timer")
+	tgr := f.New("flogo-timer")
 
 	tgr.Start()
 	time.Sleep(time.Second * 2)
