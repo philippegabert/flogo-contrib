@@ -25,12 +25,13 @@ Inputs and Outputs:
       "name": "function",
       "type": "string",
       "required": true,
-      "allowed" : ["block_avg", "moving_avg", "timeblockavg"]
+      "allowed" : ["avg","sum","min","max","count"]
     },
     {
       "name": "windowSize",
       "type": "integer",
-      "required": true
+      "required": true,
+      "allowed" : ["avg","sum","min","max","count"]
     },
     {
       "name": "value",
@@ -53,7 +54,8 @@ Inputs and Outputs:
 ## Settings
 | Setting     | Required | Description |
 |:------------|:---------|:------------|
-| function    | True     | The aggregate fuction, currently only average is supported |
+| function    | True     | The aggregate fuction. Supported: avg (Default),sum,min,max,count |
+| windowType  | True     | The window type of the values to aggregate Supported: tumbling (Default), sliding, timeTumbling, timeSliding |
 | windowSize  | True     | The window size of the values to aggregate |
 | value       | False    | The value to aggregate |
 
@@ -68,7 +70,8 @@ The below example aggregates a 'temperature' attribute with a moving window of s
 "activity": {
   "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/aggregate",
   "input": {
-    "function": "average",
+    "function": "avg",
+    "windowType": "tumbling",
     "windowSize": "5"
   },
   "mappings": {
