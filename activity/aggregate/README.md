@@ -28,10 +28,15 @@ Inputs and Outputs:
       "allowed" : ["avg","sum","min","max","count"]
     },
     {
+      "name": "windowType",
+      "type": "string",
+      "required": true,
+      "allowed" : ["tumbling","sliding","timeTumbling","timeSliding"]
+    },
+    {
       "name": "windowSize",
       "type": "integer",
-      "required": true,
-      "allowed" : ["avg","sum","min","max","count"]
+      "required": true
     },
     {
       "name": "value",
